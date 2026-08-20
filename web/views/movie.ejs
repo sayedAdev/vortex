@@ -5,65 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= movie.title %> | Vortex Cinema</title>
     <style>
-        body { background-color: #1A1A1A; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; text-align: center; }
-        .header h1 { color: #C5A059; margin-bottom: 10px; }
-        .player-container { max-width: 900px; margin: 0 auto 30px auto; }
-        .player-container iframe { width: 100%; height: 450px; border: none; border-radius: 8px; box-shadow: 0 0 15px rgba(197, 160, 89, 0.3); }
-        .watch-btn { display: inline-block; margin-top: 20px; padding: 15px 30px; background: #C5A059; color: #1A1A1A; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; text-decoration: none; }
-        .details { max-width: 800px; margin: 20px auto; background: #111; padding: 20px; border-radius: 8px; border: 1px solid #C5A059; display: flex; gap: 20px; text-align: right; }
-        .poster { width: 200px; border-radius: 8px; flex-shrink: 0; }
-        .back-link { display: inline-block; margin-top: 20px; color: #C5A059; text-decoration: none; font-weight: bold; }
+        /* إزالة كل الهوامش لجعل المشغل يأخذ كامل الشاشة */
+        html, body {
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: #000;
+        }
+        /* جعل المشغل يأخذ 100% من مساحة الـ Activity */
+        .full-screen-player {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .details {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            text-align: right;
+            z-index: 10;
+            display: none; /* مخفية افتراضياً */
+        }
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 11;
+            background: #C5A059;
+            color: #1A1A1A;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
-    <!-- استدعاء أداة ديسكورد الرسمية -->
-    <script src="https://cdn.jsdelivr.net/npm/@discord/embedded-app-sdk@1.0.2/dist/discord-embedded-app-sdk.min.js"></script>
 </head>
 <body>
-    <div class="header">
-        <h1><%= movie.title %></h1>
-    </div>
 
-    <div class="player-container">
-        <% if (trailerKey) { %>
-            <!-- تشغيل التريلر الرسمي بداخل ديسكورد ليراه الجميع -->
-            <iframe src="https://www.youtube.com/embed/<%= trailerKey %>?autoplay=1" allowfullscreen frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-        <% } else { %>
-            <p style="color: #C5A059; margin-top: 50px;">لا يتوفر تريلر لهذا الفيلم.</p>
-        <% } %>
-        
+    <!-- زر لإظهار/إخفاء تفاصيل الفيلم -->
+    <button class="toggle-btn" onclick="toggleDetails()">تفاصيل الفيلم</button>
+
+    <!-- المشغل يأخذ كامل الشاشة -->
+    <iframe src="https://vidsrc.to/embed/movie/<%= movie.id %>" class="full-screen-player" allowfullscreen frameborder="0" allow="fullscreen; encrypted-media; autoplay; picture-in-picture"></iframe>
+
+    <!-- تفاصيل الفيلم (تظهر كـ Overlay) -->
+    <div class="details" id="details">
+        <h1 style="color: #C5A059; font-size: 24px;"><%= movie.title %></h1>
+        <p><strong>تاريخ الإصدار:</strong> <%= movie.release_date || 'غير معروف' %></p>
+        <p><strong>التقييم:</strong> ⭐ <%= movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A' %></p>
+        <p style="margin-top: 15px; line-height: 1.6;"><strong>القصة:</strong> <%= movie.overview || 'لا تتوفر تفاصيل لهذا الفيلم حالياً.' %></p>
         <br>
-        <!-- زر يشغل الفيلم كاملاً عبر نافذة ديسكورد المنبثقة -->
-        <button onclick="openMovieWindow()" class="watch-btn">
-            ▶ شاهد الفيلم كاملاً (بدون إعلانات)
-        </button>
+        <a href="/" style="color: #C5A059; text-decoration: none; font-weight: bold;">العودة للبحث</a>
     </div>
-
-    <div class="details">
-        <% if (movie.poster_path) { %>
-            <img src="/proxy-image?path=<%= encodeURIComponent(movie.poster_path) %>" class="poster">
-        <% } %>
-        <div>
-            <p><strong>تاريخ الإصدار:</strong> <%= movie.release_date || 'غير معروف' %></p>
-            <p><strong>التقييم:</strong> ⭐ <%= movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A' %></p>
-            <p style="margin-top: 15px; line-height: 1.6;"><strong>القصة:</strong> <%= movie.overview || 'لا تتوفر تفاصيل لهذا الفيلم حالياً.' %></p>
-        </div>
-    </div>
-
-    <a href="/" class="back-link">العودة للرئيسية</a>
 
     <script>
-        // تهيئة ديسكورد SDK
-        const sdk = new DiscordSDK('<%= clientId %>');
-        sdk.ready().then(() => { console.log("Discord Activity is ready!"); }).catch(console.error);
-
-        // الدالة السحرية لفتح الفيلم في نافذة منبثقة داخل ديسكورد
-        function openMovieWindow() {
-            const movieUrl = 'https://vidsrc.to/embed/movie/<%= movie.id %>';
-            if (typeof sdk !== 'undefined' && sdk.commands) {
-                // استخدام أمر ديسكورد الرسمي لفتح نافذة منبثقة
-                sdk.commands.openExternalLink(movieUrl);
+        function toggleDetails() {
+            const details = document.getElementById('details');
+            if (details.style.display === 'block') {
+                details.style.display = 'none';
             } else {
-                // طريقة احتياطية للمتصفح العادي
-                window.open(movieUrl, '_blank');
+                details.style.display = 'block';
             }
         }
     </script>
