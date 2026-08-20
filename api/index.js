@@ -6,15 +6,13 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../web/views'));
 
-// أذونات الأمان التي تسمح لـ Vercel بعرض المشغل داخل ديسكورد
+// أذونات الأمان التي تسمح لـ Vercel بعرض المشغل والتريلر داخل ديسكورد
 app.use((req, res, next) => {
     res.setHeader('ngrok-skip-browser-warning', 'true');
     res.removeHeader('X-Frame-Options');
-   res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors https://discord.com https://*.discord.com; img-src * data: blob:; frame-src * https://www.youtube-nocookie.com https://www.youtube.com;");
+    res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors https://discord.com https://*.discord.com; img-src * data: blob:; frame-src *;");
     next();
 });
-
-// ... باقي كود السيرفر (tmdb و المسارات) ...
 
 const tmdb = axios.create({
     baseURL: 'https://api.themoviedb.org/3',
@@ -36,7 +34,7 @@ app.get('/', async (req, res) => {
     try {
         const response = await tmdb.get('/movie/popular');
         res.render('index', { movies: response.data.results, query: '', clientId: process.env.CLIENT_ID });
-    } catch (error) { res.status(500).send('Error: ' + error.message); }
+    } catch (error) { res.status(500).send('Error'); }
 });
 
 app.get('/search', async (req, res) => {
@@ -45,7 +43,7 @@ app.get('/search', async (req, res) => {
     try {
         const response = await tmdb.get('/search/movie', { params: { query } });
         res.render('index', { movies: response.data.results, query: query, clientId: process.env.CLIENT_ID });
-    } catch (error) { res.status(500).send('Error: ' + error.message); }
+    } catch (error) { res.status(500).send('Error'); }
 });
 
 app.get('/movie/:id', async (req, res) => {
@@ -58,7 +56,7 @@ app.get('/movie/:id', async (req, res) => {
         const videos = videosRes.data.results;
         const trailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube');
         res.render('movie', { movie, trailerKey: trailer ? trailer.key : null, clientId: process.env.CLIENT_ID });
-    } catch (error) { res.status(500).send('Error: ' + error.message); }
+    } catch (error) { res.status(500).send('Error'); }
 });
 
 module.exports = app;
