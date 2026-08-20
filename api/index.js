@@ -6,20 +6,12 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../web/views'));
 
-// أذونات الأمان التي تسمح لـ Vercel بعرض المشغل والتريلر داخل ديسكورد
-app.use((req, res, next) => {
-    res.setHeader('ngrok-skip-browser-warning', 'true');
-    res.removeHeader('X-Frame-Options');
-    res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors https://discord.com https://*.discord.com; img-src * data: blob:; frame-src *;");
-    next();
-});
-
+// تم إزالة أكواد الأمان نهائياً لكي لا تسبب الشاشة البيضاء
 const tmdb = axios.create({
     baseURL: 'https://api.themoviedb.org/3',
     params: { api_key: process.env.TMDB_API_KEY, language: 'ar-SA' }
 });
 
-// بروكسي الصور
 app.get('/proxy-image', async (req, res) => {
     try {
         const imgPath = decodeURIComponent(req.query.path);
