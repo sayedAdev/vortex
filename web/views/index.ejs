@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Age Cinema</title>
+    <style>
+        body { background-color: #1A1A1A; color: #C5A059; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin: 0; padding: 20px; }
+        h1 { font-size: 2.5em; margin-bottom: 20px; }
+        .search-bar { margin-bottom: 40px; }
+        .search-bar input { padding: 10px 20px; width: 300px; border-radius: 5px; border: 1px solid #C5A059; background: #333; color: #fff; font-size: 16px; }
+        .search-bar button { padding: 10px 20px; background: #C5A059; color: #1A1A1A; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .movie-grid { display: flex; flex-wrap: wrap; justify-content: center; }
+        .movie-card { margin: 15px; text-decoration: none; color: #fff; width: 200px; transition: transform 0.2s; }
+        .movie-card img { width: 100%; border-radius: 8px; border: 2px solid #C5A059; }
+        .movie-card:hover { transform: scale(1.05); }
+        .movie-card h3 { font-size: 16px; margin-top: 10px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@discord/embedded-app-sdk@1.0.2/dist/discord-embedded-app-sdk.min.js"></script>
+</head>
+<body>
+    <h1>✦ Golden Age Cinema ✦</h1>
+    
+    <div class="search-bar">
+        <form action="/search" method="GET">
+            <input type="text" name="q" placeholder="ابحث عن فيلم..." value="<%= query %>" required>
+            <button type="submit">بحث</button>
+        </form>
+    </div>
+
+    <div class="movie-grid">
+        <% if (movies.length === 0) { %>
+            <p>لا توجد نتائج للبحث.</p>
+        <% } else { %>
+            <% movies.forEach(movie => { %>
+                <a href="/movie/<%= movie.id %>" class="movie-card">
+                    <% if (movie.poster_path) { %>
+                        <img src="/proxy-image?path=<%= encodeURIComponent(movie.poster_path) %>" alt="<%= movie.title %>">
+                    <% } else { %>
+                        <img src="https://via.placeholder.com/200x300?text=No+Poster" alt="No Poster">
+                    <% } %>
+                    <h3><%= movie.title %></h3>
+                </a>
+            <% }) %>
+        <% } %>
+    </div>
+
+    <script>
+        try {
+            if (typeof DiscordSDK !== 'undefined') {
+                const sdk = new DiscordSDK('<%= clientId %>');
+                sdk.ready().then(() => { console.log("Discord Activity is ready!"); }).catch(console.error);
+            } else { console.log("Discord SDK not loaded."); }
+        } catch (e) { console.error("SDK Error:", e); }
+    </script>
+</body>
+</html>
