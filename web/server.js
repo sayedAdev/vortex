@@ -1,8 +1,8 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
-
+// استبدل سطر dotenv القديم بهذا
+try { require('dotenv').config({ path: path.join(__dirname, '../.env') }); } catch (e) {}
 const app = express();
 const PORT = 3000;
 
