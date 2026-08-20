@@ -12,6 +12,11 @@ const tmdb = axios.create({
     params: { api_key: process.env.TMDB_API_KEY, language: 'ar-SA' }
 });
 
+app.get('/script.js', (req, res) => {
+    res.type('text/javascript');
+    res.sendFile(path.join(__dirname, '../web/public/script.js'));
+});
+
 app.get('/proxy-image', async (req, res) => {
     try {
         const imgPath = decodeURIComponent(req.query.path);
