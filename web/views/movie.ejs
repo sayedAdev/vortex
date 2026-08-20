@@ -2,62 +2,38 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= movie.title %> | Vortex Cinema</title>
+    <title><%= movie.title %></title>
     <style>
-        body { background-color: #0d0d0d; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; text-align: center; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { color: #C5A059; margin-bottom: 20px; font-size: 2.2em; border-bottom: 2px solid #C5A059; display: inline-block; padding-bottom: 10px; }
-        
-        .media-box { background: #000; border-radius: 12px; padding: 10px; box-shadow: 0 0 20px rgba(197, 160, 89, 0.2); margin-bottom: 20px; }
-        iframe { width: 100%; height: 450px; border-radius: 8px; border: none; }
-        
-        .actions { margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-        .btn { padding: 14px 30px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: 0.3s; cursor: pointer; border: none; font-size: 16px; display: inline-flex; align-items: center; gap: 8px; }
-        .watch-btn { background: #C5A059; color: #000; }
-        .watch-btn:hover { background: #fff; color: #000; }
-        
-        .info { background: #1a1a1a; padding: 25px; border-radius: 12px; text-align: right; margin-top: 25px; border: 1px solid #333; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-        .poster { width: 180px; border-radius: 8px; border: 2px solid #C5A059; flex-shrink: 0; }
-        .details-text { flex-grow: 1; }
-        .back-link { display: inline-block; margin-top: 25px; color: #C5A059; text-decoration: none; font-weight: bold; }
-        .back-link:hover { text-decoration: underline; }
+        body { background: #0d0d0d; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
+        .media-box { background: #000; border-radius: 12px; padding: 10px; max-width: 800px; margin: 0 auto; }
+        iframe { width: 100%; height: 400px; border: none; border-radius: 8px; }
+        .btn { margin-top: 20px; padding: 15px 30px; background: #C5A059; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>✦ <%= movie.title %> ✦</h1>
+    <h1><%= movie.title %></h1>
 
-        <!-- التريلر الرسمي يشتغل جوا أكتيفيتي ديسكورد مباشرة -->
-        <div class="media-box">
-            <% if (trailerKey) { %>
-                <iframe src="https://www.youtube-nocookie.com/embed/<%= trailerKey %>?autoplay=0&rel=0&modestbranding=1" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen></iframe>
-            <% } else { %>
-                <p style="padding: 100px; color: #C5A059;">لا يتوفر تريلر لهذا الفيلم حالياً.</p>
-            <% } %>
-        </div>
-
-        <div class="actions">
-            <!-- زرار الفيلم الكامل بيفتح في نافذة جديدة عشان يشتغل بجودة كاملة وبدون إعلانات مزعجة جوه الأكتيفيتي -->
-            <a href="https://vidsrc.to/embed/movie/<%= movie.id %>" target="_blank" rel="noopener noreferrer" class="btn watch-btn">
-                🎬 مشاهدة الفيلم كاملاً (شاشة كاملة)
-            </a>
-        </div>
-
-        <div class="info">
-            <% if (movie.poster_path) { %>
-                <img src="/proxy-image?path=<%= encodeURIComponent(movie.poster_path) %>" class="poster">
-            <% } %>
-            <div class="details-text">
-                <p><strong>تاريخ الإصدار:</strong> <%= movie.release_date || 'غير معروف' %></p>
-                <p><strong>التقييم:</strong> ⭐ <%= movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A' %></p>
-                <p style="margin-top: 15px; line-height: 1.6;"><strong>القصة:</strong> <%= movie.overview || 'لا توجد تفاصيل متاحة.' %></p>
-            </div>
-        </div>
-
-        <a href="/" class="back-link">← العودة للرئيسية</a>
+    <div class="media-box">
+        <% if (trailerKey) { %>
+            <iframe src="https://www.youtube-nocookie.com/embed/<%= trailerKey %>" allowfullscreen></iframe>
+        <% } else { %>
+            <p>لا يتوفر تريلر</p>
+        <% } %>
     </div>
+
+    <button id="watchBtn" class="btn">🎬 شاهد الفيلم كاملاً (في المتصفح)</button>
+
+    <!-- تحميل الـ SDK الخاص بديسكورد -->
+    <script src="https://unpkg.com/@discord/embedded-app-sdk/dist/embedded-app-sdk.js"></script>
+    <script>
+        const discordSdk = new DiscordSDK('<%= clientId %>');
+
+        document.getElementById('watchBtn').onclick = async () => {
+            // هذا الأمر هو الوحيد المسموح به لفتح روابط خارجية من داخل الأكتيفيتي
+            await discordSdk.commands.openExternalUrl({
+                url: 'https://vidsrc.to/embed/movie/<%= movie.id %>'
+            });
+        };
+    </script>
 </body>
 </html>
