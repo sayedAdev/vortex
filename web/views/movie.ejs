@@ -7,15 +7,12 @@
     <style>
         body { background-color: #1A1A1A; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; text-align: center; }
         .header h1 { color: #C5A059; margin-bottom: 20px; font-size: 2em; }
-        .player-container { max-width: 800px; margin: 0 auto 30px auto; }
-        .player-container iframe { width: 100%; height: 400px; border: none; border-radius: 8px; }
-        .btn { display: inline-block; margin-top: 20px; padding: 15px 40px; background: #C5A059; color: #1A1A1A; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .player-container { max-width: 900px; margin: 0 auto; }
+        video { width: 100%; height: auto; max-height: 600px; border: 2px solid #C5A059; border-radius: 8px; background: #000; }
         .details { max-width: 800px; margin: 20px auto; background: #111; padding: 20px; border-radius: 8px; border: 1px solid #C5A059; display: flex; gap: 20px; text-align: right; }
         .poster { width: 200px; border-radius: 8px; flex-shrink: 0; }
-        .back-link { display: inline-block; margin-top: 20px; color: #C5A059; text-decoration: none; font-weight: bold; }
+        .back-link { display: inline-block; margin-top: 20px; color: #C5A059; text-decoration: none; font-weight: bold; font-size: 18px; }
     </style>
-    <!-- استدعاء أداة ديسكورد الرسمية -->
-    <script src="https://cdn.jsdelivr.net/npm/@discord/embedded-app-sdk@1.0.2/dist/discord-embedded-app-sdk.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -23,17 +20,11 @@
     </div>
 
     <div class="player-container">
-        <% if (trailerKey) { %>
-            <iframe src="https://www.youtube.com/embed/<%= trailerKey %>" allowfullscreen frameborder="0" allow="autoplay; encrypted-media"></iframe>
-        <% } else { %>
-            <p style="color: #C5A059; margin-top: 50px;">لا يتوفر تريلر لهذا الفيلم.</p>
-        <% } %>
-        
-        <br>
-        <!-- زر يستخدم أمر ديسكورد الرسمي -->
-        <button onclick="openMovie()" class="btn">
-            🎬 شاهد الفيلم كاملاً
-        </button>
+        <video controls autoplay>
+            <!-- قراءة الفيديو من رابط جوجل درايف -->
+            <source src="<%= url %>" type="video/mp4">
+            متصفحك لا يدعم تشغيل الفيديو.
+        </video>
     </div>
 
     <div class="details">
@@ -43,22 +34,10 @@
         <div>
             <p><strong>تاريخ الإصدار:</strong> <%= movie.release_date || 'غير معروف' %></p>
             <p><strong>التقييم:</strong> ⭐ <%= movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A' %></p>
-            <p style="margin-top: 15px; line-height: 1.6;"><strong>القصة:</strong> <%= movie.overview || 'لا تتوفر تفاصيل لهذا الفيلم حالياً.' %></p>
+            <p style="margin-top: 15px; line-height: 1.6;"><strong>القصة:</strong> <%= movie.overview || 'لا تتوفر تفاصيل.' %></p>
         </div>
     </div>
 
-    <a href="/" class="back-link">العودة للرئيسية</a>
-
-    <script>
-        // تهيئة أداة ديسكورد
-        const sdk = new DiscordSDK('<%= clientId %>');
-        sdk.ready().then(() => { console.log("Discord SDK is ready!"); });
-
-        // دالة فتح الرابط في المتصفح الخارجي
-        function openMovie() {
-            const url = 'https://vidsrc.to/embed/movie/<%= movie.id %>';
-            sdk.commands.openExternalLink(url);
-        }
-    </script>
+    <a href="/" class="back-link">العودة لقائمة الأفلام</a>
 </body>
 </html>
