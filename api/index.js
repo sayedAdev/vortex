@@ -10,7 +10,7 @@ app.set('views', path.join(__dirname, '../web/views'));
 app.use((req, res, next) => {
     res.setHeader('ngrok-skip-browser-warning', 'true');
     res.removeHeader('X-Frame-Options');
-    res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors https://discord.com https://*.discord.com; img-src * data: blob:; frame-src *;");
+   res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors https://discord.com https://*.discord.com; img-src * data: blob:; frame-src * https://www.youtube-nocookie.com https://www.youtube.com;");
     next();
 });
 

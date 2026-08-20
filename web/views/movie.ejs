@@ -5,77 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= movie.title %> | Vortex Cinema</title>
     <style>
-        /* إزالة كل الهوامش لجعل المشغل يأخذ كامل الشاشة */
-        html, body {
-            margin: 0; 
-            padding: 0; 
-            height: 100%; 
-            overflow: hidden; 
-            background-color: #000;
-        }
-        /* جعل المشغل يأخذ 100% من مساحة الـ Activity */
-        .full-screen-player {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .details {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 300px;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            text-align: right;
-            z-index: 10;
-            display: none; /* مخفية افتراضياً */
-        }
-        .toggle-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 11;
-            background: #C5A059;
-            color: #1A1A1A;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        body { background-color: #1A1A1A; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; text-align: center; }
+        .header h1 { color: #C5A059; margin-bottom: 10px; font-size: 2em; }
+        .player-container { max-width: 800px; margin: 0 auto 30px auto; }
+        .player-container iframe { width: 100%; height: 450px; border: none; border-radius: 8px; box-shadow: 0 0 15px rgba(197, 160, 89, 0.3); }
+        .watch-btn { display: inline-block; margin-top: 20px; padding: 15px 40px; background: #C5A059; color: #1A1A1A; border-radius: 8px; font-size: 18px; font-weight: bold; text-decoration: none; transition: 0.2s; }
+        .watch-btn:hover { background: #fff; }
+        .details { max-width: 800px; margin: 20px auto; background: #111; padding: 20px; border-radius: 8px; border: 1px solid #C5A059; display: flex; gap: 20px; text-align: right; }
+        .poster { width: 200px; border-radius: 8px; flex-shrink: 0; }
+        .back-link { display: inline-block; margin-top: 20px; color: #C5A059; text-decoration: none; font-weight: bold; }
+        .notice { color: #888; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
-
-    <!-- زر لإظهار/إخفاء تفاصيل الفيلم -->
-    <button class="toggle-btn" onclick="toggleDetails()">تفاصيل الفيلم</button>
-
-    <!-- المشغل يأخذ كامل الشاشة -->
-    <iframe src="https://vidsrc.to/embed/movie/<%= movie.id %>" class="full-screen-player" allowfullscreen frameborder="0" allow="fullscreen; encrypted-media; autoplay; picture-in-picture"></iframe>
-
-    <!-- تفاصيل الفيلم (تظهر كـ Overlay) -->
-    <div class="details" id="details">
-        <h1 style="color: #C5A059; font-size: 24px;"><%= movie.title %></h1>
-        <p><strong>تاريخ الإصدار:</strong> <%= movie.release_date || 'غير معروف' %></p>
-        <p><strong>التقييم:</strong> ⭐ <%= movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A' %></p>
-        <p style="margin-top: 15px; line-height: 1.6;"><strong>القصة:</strong> <%= movie.overview || 'لا تتوفر تفاصيل لهذا الفيلم حالياً.' %></p>
-        <br>
-        <a href="/" style="color: #C5A059; text-decoration: none; font-weight: bold;">العودة للبحث</a>
+    <div class="header">
+        <h1>✦ <%= movie.title %> ✦</h1>
     </div>
 
-    <script>
-        function toggleDetails() {
-            const details = document.getElementById('details');
-            if (details.style.display === 'block') {
-                details.style.display = 'none';
-            } else {
-                details.style.display = 'block';
-            }
-        }
-    </script>
+    <div class="player-container">
+        <% if (trailerKey) { %>
+            <!-- التريلر الرسمي يعمل بداخل ديسكورد بدون حظر -->
+            <iframe src="https://www.youtube-nocookie.com/embed/<%= trailerKey %>" allowfullscreen frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+        <% } else { %>
+            <p style="color: #C5A059; margin-top: 50px;">لا يتوفر تريلر لهذا الفيلم.</p>
+        <% } %>
+        
+        <br>
+        <!-- زر خارجي لفتح الفيلم في المتصفح ومشاركته عبر الشاشة -->
+        <a href="https://vidsrc.to/embed/movie/<%= movie.id %>" target="_blank" rel="noopener noreferrer" class="watch-btn">
+            🎬 شاهد الفيلم كاملاً (افتح في المتصفح)
+        </a>
+        <p class="notice">للمشاهدة الجماعية: افتح الرابط، ثم استخدم خيار (مشاركة الشاشة) في ديسكورد.</p>
+    </div>
+
+    <div class="details">
+        <% if (movie.poster_path) { %>
+            <img src="/proxy-image?path=<%= encodeURIComponent(movie.poster_path) %>" class="poster">
+        <% } %>
+        <div>
+            <p><strong>تاريخ الإصدار:</strong> <%= movie.release_date || 'غير معروف' %></p>
+            <p><strong>التقييم:</strong> ⭐ <%= movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A' %></p>
+            <p style="margin-top: 15px; line-height: 1.6;"><strong>القصة:</strong> <%= movie.overview || 'لا تتوفر تفاصيل لهذا الفيلم حالياً.' %></p>
+        </div>
+    </div>
+
+    <a href="/" class="back-link">العودة للرئيسية</a>
 </body>
 </html>
