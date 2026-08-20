@@ -4,7 +4,8 @@ const path = require('path');
 
 const app = express();
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+// داخل ملف api/index.js
+app.set('views', path.join(__dirname, '../web/views'));
 
 app.use((req, res, next) => {
     res.setHeader('ngrok-skip-browser-warning', 'true');
