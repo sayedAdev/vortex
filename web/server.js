@@ -1,25 +1,22 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
-// استبدل سطر dotenv القديم بهذا
-try { require('dotenv').config({ path: path.join(__dirname, '../.env') }); } catch (e) {}
+
 const app = express();
-const PORT = 3000;
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 app.use((req, res, next) => {
     res.setHeader('ngrok-skip-browser-warning', 'true');
     next();
 });
 
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
 const tmdb = axios.create({
     baseURL: 'https://api.themoviedb.org/3',
     params: { api_key: process.env.TMDB_API_KEY, language: 'ar-SA' }
 });
 
-// 1. بروكسي الصور
+// بروكسي الصور
 app.get('/proxy-image', async (req, res) => {
     try {
         const imgPath = decodeURIComponent(req.query.path);
@@ -30,36 +27,11 @@ app.get('/proxy-image', async (req, res) => {
     } catch (error) { res.status(500).send('Image Error'); }
 });
 
-// 2. بروكسي مشغل الفيديو (يدوي بدون أدوات خارجية)
-app.get('/videoproxy/*', async (req, res) => {
-    try {
-        // الحصول على المسار المطلوب (مثال: embed/movie/634649)
-        const requestedPath = req.params[0];
-        const targetUrl = `https://vidsrc.to/${requestedPath}`;
-        
-        // جلب صفحة المشغل
-        const response = await axios.get(targetUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        });
-        
-        // مسح أوامر الحظر التي تمنع التشغيل داخل ديسكورد
-        res.removeHeader('X-Frame-Options');
-        res.removeHeader('Content-Security-Policy');
-        res.set('Content-Type', 'text/html');
-        
-        // إرسال صفحة المشغل لموقعك
-        res.send(response.data);
-    } catch (error) {
-        console.error('Video Proxy Error:', error.message);
-        res.status(500).send('Proxy Error');
-    }
-});
-
 app.get('/', async (req, res) => {
     try {
         const response = await tmdb.get('/movie/popular');
         res.render('index', { movies: response.data.results, query: '', clientId: process.env.CLIENT_ID });
-    } catch (error) { res.status(500).send('Error'); }
+    } catch (error) { res.status(500).send('Error: ' + error.message); }
 });
 
 app.get('/search', async (req, res) => {
@@ -68,7 +40,7 @@ app.get('/search', async (req, res) => {
     try {
         const response = await tmdb.get('/search/movie', { params: { query } });
         res.render('index', { movies: response.data.results, query: query, clientId: process.env.CLIENT_ID });
-    } catch (error) { res.status(500).send('Error'); }
+    } catch (error) { res.status(500).send('Error: ' + error.message); }
 });
 
 app.get('/movie/:id', async (req, res) => {
@@ -81,8 +53,7 @@ app.get('/movie/:id', async (req, res) => {
         const videos = videosRes.data.results;
         const trailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube');
         res.render('movie', { movie, trailerKey: trailer ? trailer.key : null, clientId: process.env.CLIENT_ID });
-    } catch (error) { res.status(500).send('Error'); }
+    } catch (error) { res.status(500).send('Error: ' + error.message); }
 });
 
-// بدلاً من app.listen
 module.exports = app;
