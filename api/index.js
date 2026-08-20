@@ -4,13 +4,17 @@ const path = require('path');
 
 const app = express();
 app.set('view engine', 'ejs');
-// داخل ملف api/index.js
 app.set('views', path.join(__dirname, '../web/views'));
 
+// أذونات الأمان التي تسمح لـ Vercel بعرض المشغل داخل ديسكورد
 app.use((req, res, next) => {
     res.setHeader('ngrok-skip-browser-warning', 'true');
+    res.removeHeader('X-Frame-Options');
+    res.setHeader('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors https://discord.com https://*.discord.com; img-src * data: blob:; frame-src *;");
     next();
 });
+
+// ... باقي كود السيرفر (tmdb و المسارات) ...
 
 const tmdb = axios.create({
     baseURL: 'https://api.themoviedb.org/3',

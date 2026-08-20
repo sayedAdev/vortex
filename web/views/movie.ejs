@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= movie.title %></title>
+    <title><%= movie.title %> | Vortex Cinema</title>
     <style>
         body { background-color: #1A1A1A; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; text-align: center; }
         .header h1 { color: #C5A059; margin-bottom: 10px; }
@@ -20,8 +20,8 @@
     </div>
 
     <div class="player-container">
-        <!-- المشغل الوحيد المتوافق مع بيئة ديسكورد -->
-        <iframe src="https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1" allowfullscreen frameborder="0" allow="fullscreen; encrypted-media; autoplay; picture-in-picture"></iframe>
+        <!-- المشغل مباشرة أمامك -->
+        <iframe src="https://vidsrc.to/embed/movie/<%= movie.id %>" allowfullscreen frameborder="0" allow="fullscreen; encrypted-media; autoplay; picture-in-picture"></iframe>
     </div>
 
     <div class="details">
